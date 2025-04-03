@@ -8,5 +8,6 @@ dependencies = [
     "dotenv>=0.9.9",
     "mcp[cli]>=1.6.0",
     "pyrogram>=2.0.106",
+    "pytz>=2025.2",
     "telethon>=1.39.0",
 ]
