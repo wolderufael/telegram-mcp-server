@@ -55,7 +55,11 @@ TG_API_ID=your_api_id
 TG_API_HASH=your_api_hash
 phone=your_phone_number  # Format: +1234567890
 ```
-
+3. Authenticate your Telegram for first time only
+```bash
+uv run telegram_auth.py 
+```
+Enter the code you received via telegram when prompted.
 ## Integration with Cursor/Claude Desktop
 
 Copy the below json with the appropriate {{PATH}} values:
@@ -67,7 +71,7 @@ Copy the below json with the appropriate {{PATH}} values:
       "command": "{{PATH_TO_UV}}", // Run `which uv` and place the output here
       "args": [
         "--directory",
-        "{{PATH_TO_SRC}}/whatsapp-mcp/whatsapp-mcp-server", // cd into the repo, run `pwd` and enter the output here + "/whatsapp-mcp-server"
+        "{{PATH_TO_SRC}}\\telegram-mcp-server", // cd into the repo, run `pwd` and enter the output here + "/whatsapp-mcp-server"
         "run",
         "main.py"
       ]
