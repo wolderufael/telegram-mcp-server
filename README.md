@@ -44,7 +44,7 @@ cd telegram-MCP-server
 uv venv .venv  # Create a virtual environment
 source .venv/bin/activate  # Activate it (Linux/macOS)
 .\venv\Scripts\activate  # Activate it (Windows)
-uv pip install
+uv pip install .
 
 ```
 
