@@ -45,21 +45,32 @@ uv venv .venv  # Create a virtual environment
 source .venv/bin/activate  # Activate it (Linux/macOS)
 .\venv\Scripts\activate  # Activate it (Windows)
 uv pip install .
-
 ```
 
-3. Create a `.env` file in the project root with your Telegram credentials:
+3. Get your Telegram API ID and API Hash:
+
+- Go to https://my.telegram.org
+- Log in with your phone number
+- Click on "API development tools"
+- Fill in the required fields (you can use any app title and short name)
+- After submitting, you will see your API ID and API Hash
+
+4. Create a `.env` file in the project root with your Telegram credentials:
 
 ```env
 TG_API_ID=your_api_id
 TG_API_HASH=your_api_hash
 phone=your_phone_number  # Format: +1234567890
 ```
-3. Authenticate your Telegram for first time only
+
+5. Authenticate your Telegram for first time only
+
 ```bash
-uv run telegram_auth.py 
+uv run telegram_auth.py
 ```
+
 Enter the code you received via telegram when prompted.
+
 ## Integration with Cursor/Claude Desktop
 
 Copy the below json with the appropriate {{PATH}} values:
