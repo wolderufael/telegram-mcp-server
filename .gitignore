@@ -2,3 +2,6 @@
 .env
 session_name.session
 .vscode
+build
+dist
+telegram_mcp_server.egg-info

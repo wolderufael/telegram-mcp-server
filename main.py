@@ -1,17 +1,25 @@
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
-from dataclasses import dataclass
-from typing import Optional, List, Tuple
+#from dataclasses import dataclass
+#from typing import Optional, List, Tuple
 from datetime import datetime
 import pytz
-
-load_dotenv()
-
-mcp = FastMCP("telegram")
-
+#import asyncio
 import os
 from telethon import TelegramClient
 from dotenv import load_dotenv
+from telethon.errors import SessionPasswordNeededError
+import inspect
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+mcp = FastMCP("telegram")
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,16 +29,17 @@ api_id = int(os.getenv("TG_API_ID"))
 api_hash = os.getenv("TG_API_HASH")
 phone = os.getenv("phone")
 
+
+
 # Initialize the Telegram client
 client = TelegramClient('session_name', api_id, api_hash)
-   
-    
+
+
 @mcp.tool()
 async def get_contacts():
     """ Get the names of the contacts """
-    await client.start(phone=phone)
-
-    # Get all contacts
+    if not client.is_connected():
+        await client.connect()
     contacts = await client.get_dialogs()  # Fetch all dialogs (chats, groups, etc.)
     personal_contacts = []
     
@@ -44,9 +53,6 @@ async def get_contacts():
             }
             personal_contacts.append(contact_info)
 
-    # Disconnect the client
-    await client.disconnect()
-    
     return personal_contacts
 
 
@@ -58,15 +64,11 @@ async def send_message_by_identifier(identifier: str, message: str):
         identifier: The name or phone number of the contact
         message: The message to send
     """
-    await client.start(phone=phone)
-    
-    # Get all contacts
-    contacts = await client.get_dialogs()
-    
-    # Find the user by name or phone
+    if not client.is_connected():
+        await client.connect()
     target_user = None
     found_name = None
-    for dialog in contacts:
+    for dialog in await client.get_dialogs():
         if dialog.is_user and hasattr(dialog.entity, 'bot') and not dialog.entity.bot:
             user = dialog.entity
             full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
@@ -86,7 +88,6 @@ async def send_message_by_identifier(identifier: str, message: str):
     else:
         result = f"Could not find user with identifier: {identifier}"
     
-    await client.disconnect()
     return result
 
 
@@ -97,15 +98,11 @@ async def get_last_interaction(identifier: str):
     Args:
         identifier: The name or phone number of the contact
     """
-    await client.start(phone=phone)
-    
-    # Get all contacts
-    contacts = await client.get_dialogs()
-    
-    # Find the user by name or phone
+    if not client.is_connected():
+        await client.connect()
     target_dialog = None
     found_name = None
-    for dialog in contacts:
+    for dialog in await client.get_dialogs():
         if dialog.is_user and hasattr(dialog.entity, 'bot') and not dialog.entity.bot:
             user = dialog.entity
             full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
@@ -146,7 +143,6 @@ async def get_last_interaction(identifier: str):
             "error": f"Could not find contact with identifier: {identifier}"
         }
     
-    await client.disconnect()
     return result
 
 
@@ -160,15 +156,11 @@ async def get_chat_history(identifier: str, start_date: str = None, end_date: st
         end_date: End date in format 'YYYY-MM-DD' (optional)
         limit: Maximum number of messages to return (default 20)
     """ 
-    await client.start(phone=phone)
-    
-    # Get all contacts
-    contacts = await client.get_dialogs()
-    
-    # Find the user by name or phone
+    if not client.is_connected():
+        await client.connect()
     target_user = None
     found_name = None
-    for dialog in contacts:
+    for dialog in await client.get_dialogs():
         if dialog.is_user and hasattr(dialog.entity, 'bot') and not dialog.entity.bot:
             user = dialog.entity
             full_name = f"{user.first_name} {user.last_name if user.last_name else ''}".strip()
@@ -182,7 +174,6 @@ async def get_chat_history(identifier: str, start_date: str = None, end_date: st
                 break
     
     if not target_user:
-        await client.disconnect()
         return {"error": f"Could not find user with identifier: {identifier}"}
 
     # Convert date strings to datetime objects
@@ -190,7 +181,6 @@ async def get_chat_history(identifier: str, start_date: str = None, end_date: st
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d').replace(tzinfo=pytz.UTC) if start_date else None
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d').replace(tzinfo=pytz.UTC) if end_date else None
     except ValueError as e:
-        await client.disconnect()
         return {"error": f"Invalid date format. Please use YYYY-MM-DD format. Error: {str(e)}"}
 
     # Get messages
@@ -219,7 +209,6 @@ async def get_chat_history(identifier: str, start_date: str = None, end_date: st
         }
     }
 
-    await client.disconnect()
     return result
 
 
@@ -233,8 +222,8 @@ async def get_channel_posts(channel_name: str, start_date: str = None, end_date:
         end_date: End date in format 'YYYY-MM-DD' (optional)
         limit: Maximum number of posts to return (default 20)
     """
-    await client.start(phone=phone)
-    
+    if not client.is_connected():
+        await client.connect()
     try:
         # Clean up channel name (remove @ if present)
         channel_username = channel_name.lstrip('@')
@@ -308,7 +297,6 @@ async def get_channel_posts(channel_name: str, start_date: str = None, end_date:
             "error": f"Error fetching channel posts: {str(e)}"
         }
     
-    await client.disconnect()
     return result
 
 
