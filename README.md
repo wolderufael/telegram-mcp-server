@@ -67,7 +67,7 @@ Copy the below json with the appropriate {{PATH}} values:
 ```json
 {
   "mcpServers": {
-    "whatsapp": {
+    "telegram": {
       "command": "{{PATH_TO_UV}}", // Run `which uv` and place the output here
       "args": [
         "--directory",
